@@ -22,7 +22,7 @@ namespace ExemploSignalR.Controllers
         // GET: Produtos
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Produto.ToListAsync());
+            return View(await _context.Produtos.ToListAsync());
         }
 
         // GET: Produtos/Details/5
@@ -33,7 +33,7 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var produto = await _context.Produto
+            var produto = await _context.Produtos
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (produto == null)
             {
@@ -73,7 +73,7 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var produto = await _context.Produto.FindAsync(id);
+            var produto = await _context.Produtos.FindAsync(id);
             if (produto == null)
             {
                 return NotFound();
@@ -124,7 +124,7 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var produto = await _context.Produto
+            var produto = await _context.Produtos
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (produto == null)
             {
@@ -139,10 +139,10 @@ namespace ExemploSignalR.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var produto = await _context.Produto.FindAsync(id);
+            var produto = await _context.Produtos.FindAsync(id);
             if (produto != null)
             {
-                _context.Produto.Remove(produto);
+                _context.Produtos.Remove(produto);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +151,7 @@ namespace ExemploSignalR.Controllers
 
         private bool ProdutoExists(int id)
         {
-            return _context.Produto.Any(e => e.Id == id);
+            return _context.Produtos.Any(e => e.Id == id);
         }
     }
 }

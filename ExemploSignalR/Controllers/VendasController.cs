@@ -22,7 +22,7 @@ namespace ExemploSignalR.Controllers
         // GET: Vendas
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Produtos.Include(v => v.Produto);
+            var appDbContext = _context.Vendas.Include(v => v.Produto);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -34,7 +34,7 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var venda = await _context.Produtos
+            var venda = await _context.Vendas
                 .Include(v => v.Produto)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (venda == null)
@@ -48,7 +48,7 @@ namespace ExemploSignalR.Controllers
         // GET: Vendas/Create
         public IActionResult Create()
         {
-            ViewData["ProdutoId"] = new SelectList(_context.Produto, "Id", "Id");
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Nome");
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace ExemploSignalR.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProdutoId"] = new SelectList(_context.Produto, "Id", "Id", venda.ProdutoId);
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Nome", venda.ProdutoId);
             return View(venda);
         }
 
@@ -77,12 +77,12 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var venda = await _context.Produtos.FindAsync(id);
+            var venda = await _context.Vendas.FindAsync(id);
             if (venda == null)
             {
                 return NotFound();
             }
-            ViewData["ProdutoId"] = new SelectList(_context.Produto, "Id", "Id", venda.ProdutoId);
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Nome", "Id", venda.ProdutoId);
             return View(venda);
         }
 
@@ -118,7 +118,7 @@ namespace ExemploSignalR.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ProdutoId"] = new SelectList(_context.Produto, "Id", "Id", venda.ProdutoId);
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Nome", venda.ProdutoId);
             return View(venda);
         }
 
@@ -130,7 +130,7 @@ namespace ExemploSignalR.Controllers
                 return NotFound();
             }
 
-            var venda = await _context.Produtos
+            var venda = await _context.Vendas
                 .Include(v => v.Produto)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (venda == null)

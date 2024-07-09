@@ -9,8 +9,7 @@ namespace ExemploSignalR.Data
         {
         }
 
-        public DbSet<Venda> Produtos { get; set; }
+        public DbSet<Produto> Produtos { get; set; }
         public DbSet<Venda> Vendas { get; set; }
-        public DbSet<ExemploSignalR.Models.Produto> Produto { get; set; } = default!;
     }
 }
