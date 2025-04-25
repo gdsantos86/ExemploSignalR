@@ -1,4 +1,6 @@
-﻿@{
+﻿@model IEnumerable<ExemploSignalR.Models.Venda>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
@@ -6,3 +8,44 @@
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+<div class="card text-white bg-primary mb-3" style="max-width: 18rem;">
+    <div class="card-header">Vendas</div>
+    <div class="card-body">
+    <h2 class="card-title" id="total_vendas"></h2>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var connection = new signalR.HubConnectionBuilder()
+                .withUrl("/vendasHub")
+                .configureLogging(signalR.LogLevel.Information)
+                .withAutomaticReconnect()
+                .build();
+
+            connection.start().then(function () {
+                var totalVendas = @ViewBag.TotalVendas;
+                // Notificar o servidor sobre a conexão inicial
+                connection.invoke('NotificaTotalVendas', totalVendas)
+                    .catch(function (err) {
+                        console.error("Erro ao invocar NotificaTotalVendas: " + err.toString());
+                    });
+            }).catch(function (err) {
+                console.error("Erro ao conectar ao hub: " + err.toString());
+            });
+
+            connection.on('RecebeTotalVendas', function (novoTotalVendas) {
+                console.log("Recebido atualização: " + novoTotalVendas);
+                document.getElementById("total_vendas").innerHTML = novoTotalVendas;
+            }); 
+
+        })
+    </script>
+}
+

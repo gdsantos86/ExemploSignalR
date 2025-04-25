@@ -1,23 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ExemploSignalR.Data;
 using ExemploSignalR.Models;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis;
+using ExemploSignalR.Hubs;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace ExemploSignalR.Controllers
 {
     public class VendasController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly IHubContext<VendasHub> _hubContext;
 
-        public VendasController(AppDbContext context)
+
+
+        public VendasController(AppDbContext context, IHubContext<VendasHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
+
+
 
         // GET: Vendas
         public async Task<IActionResult> Index()
@@ -63,6 +69,13 @@ namespace ExemploSignalR.Controllers
             {
                 _context.Add(venda);
                 await _context.SaveChangesAsync();
+
+                // Recupera o novo número total de vendas para o produto
+                int novoTotalVendas = _context.Vendas.Sum(s => s.Quantidade);
+
+                // Envia a atualização para os clientes conectados
+                await _hubContext.Clients.All.SendAsync("RecebeTotalVendas", novoTotalVendas);
+
                 return RedirectToAction(nameof(Index));
             }
             ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Nome", venda.ProdutoId);
@@ -82,7 +95,7 @@ namespace ExemploSignalR.Controllers
             {
                 return NotFound();
             }
-            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Nome", "Id", venda.ProdutoId);
+            ViewData["ProdutoId"] = new SelectList(_context.Produtos, "Id", "Nome", venda.ProdutoId);
             return View(venda);
         }
 
@@ -104,6 +117,10 @@ namespace ExemploSignalR.Controllers
                 {
                     _context.Update(venda);
                     await _context.SaveChangesAsync();
+
+                    // Adicionar notificação após edição também
+                    int novoTotalVendas = _context.Vendas.Sum(s => s.Quantidade);
+                    await _hubContext.Clients.All.SendAsync("RecebeTotalVendas", novoTotalVendas);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -146,19 +163,24 @@ namespace ExemploSignalR.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var venda = await _context.Produtos.FindAsync(id);
+            var venda = await _context.Vendas.FindAsync(id);
             if (venda != null)
             {
-                _context.Produtos.Remove(venda);
+                _context.Vendas.Remove(venda);
             }
 
             await _context.SaveChangesAsync();
+
+            // Notificar após exclusão também
+            int novoTotalVendas = _context.Vendas.Sum(s => s.Quantidade);
+            await _hubContext.Clients.All.SendAsync("RecebeTotalVendas", novoTotalVendas);
+
             return RedirectToAction(nameof(Index));
         }
 
         private bool VendaExists(int id)
         {
-            return _context.Produtos.Any(e => e.Id == id);
+            return _context.Vendas.Any(e => e.Id == id);
         }
     }
 }
